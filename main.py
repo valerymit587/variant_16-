@@ -60,6 +60,21 @@ def build_graph_dfs(node, data, max_depth, current_depth=0, visited=None):
                     
     return graph
 
+def get_load_order(graph, start_package):
+    visited = set()
+    order = []
+    
+    def dfs(node):
+        if node in visited:
+            return
+        visited.add(node)
+        for dep in graph.get(node, []):
+            dfs(dep)
+        order.append(node)
+        
+    dfs(start_package)
+    return order
+
 def generate_graphviz(graph, output_file):
     lines = ["digraph G {"]
     for node, deps in graph.items():
@@ -70,10 +85,15 @@ def generate_graphviz(graph, output_file):
                 lines.append(f'    "{node}" -> "{dep}";')
     lines.append("}")
     
+    graphviz_code = "\n".join(lines)
+    
+    print("\n--- Код Graphviz ---")
+    print(graphviz_code)
+    
     try:
         with open(output_file, 'w', encoding='utf-8') as f:
-            f.write("\n".join(lines))
-        print(f"Файл Graphviz сохранен: {output_file}")
+            f.write(graphviz_code)
+        print(f"\nФайл Graphviz сохранен: {output_file}")
     except Exception as e:
         print(f"Ошибка сохранения: {e}")
 
@@ -102,6 +122,10 @@ def main():
             for pkg, deps in graph.items():
                 deps_str = ", ".join(deps) if deps else "нет"
                 print(f"{pkg} -> [{deps_str}]")
+                
+            print("\n--- Порядок загрузки зависимостей ---")
+            load_order = get_load_order(graph, args.package)
+            print(" -> ".join(load_order))
                 
             generate_graphviz(graph, args.output)
 

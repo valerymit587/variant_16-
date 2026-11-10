@@ -12,4 +12,4 @@
 
 ## Запуск
 ```bash
-python main.py --package A --repo test_repo.txt --test-mode --depth 3
+python main.py --package A --repo test_repo.txt --test-mode --depth 
